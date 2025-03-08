@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubus 3D</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #282c34;
+            flex-direction: column;
+        }
+        .scene {
+            width: 300px;
+            height: 300px;
+            perspective: 900px;
+        }
+        .cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transform: rotateX(50deg) rotateY(0deg);
+            transition: transform 1s;
+        }
+        .face {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: rgb(0, 150, 255);
+            border: 2px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            text-align: center;
+            transition: transform 1s, opacity 1s;
+        }
+        .front  { transform: translateZ(150px); }
+        .back   { transform: rotateY(180deg) translateZ(150px); }
+        .right  { transform: rotateY(90deg) translateZ(150px); }
+        .left   { transform: rotateY(-90deg) translateZ(150px); }
+        .top    { transform: rotateX(90deg) translateZ(150px); }
+        .bottom { transform: rotateX(-90deg) translateZ(150px); }
+
+        .cube.open .front  { transform: translateZ(320px); opacity: 0; }
+        .cube.open .back   { transform: rotateY(180deg) translateZ(320px); opacity: 0; }
+        .cube.open .right  { transform: rotateY(90deg) translateZ(320px); opacity: 0; }
+        .cube.open .left   { transform: rotateY(-90deg) translateZ(320px); opacity: 0; }
+        .cube.open .top    { transform: rotateX(90deg) translateZ(320px); opacity: 0; }
+        .cube.open .bottom { transform: rotateX(-90deg) translateZ(320px); opacity: 0; }
+        
+        .content {
+            position: absolute;
+            width: 800px;
+            height: 500px;
+            background: white;
+            color: black;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+        .content.active {
+            display: block;
+            opacity: 1;
+        }
+        .button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button-container {
+            margin-top: auto;
+            display: flex;
+            justify-content: center;
+            gap: 250px;
+            padding-top: 25%;
+        }
+    </style>
+</head>
+<body>
+    <div class="scene">
+        <div class="cube" id="cube">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face right"></div>
+            <div class="face left"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+        </div>
+    </div>
+    
+    <div class="content" id="content">
+        <h2 id="content-title">Materi 1</h2>
+        <p id="content-text">Ini adalah materi pertama.</p>
+        <div class="button-container">
+            <button class="button" id="prevButton">Sebelumnya</button>
+            <button class="button" id="resetButton">Close</button>
+            <button class="button" id="nextButton">Berikutnya</button>
+        </div>
+    </div>
+    
+    <script>
+        const pages = [
+            { title: "Materi 1", text: "Ini adalah materi pertama. Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis, sed commodi ducimus sequi aliquam, nam eveniet totam labore sit magni quasi consectetur distinctio. Id sit pariatur, earum adipisci molestiae architecto? Lorem ipsum dolor sit amet consectetur adipisicing elit. Quibusdam autem enim ex rem sequi, voluptate ullam exercitationem consectetur vitae iusto suscipit est. Quisquam, alias praesentium dignissimos et laudantium similique! Libero. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quibusdam autem enim ex rem sequi, voluptate ullam exercitationem consectetur vitae iusto suscipit est. Quisquam, alias praesentium dignissimos et laudantium similique! Libero. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quibusdam autem enim ex rem sequi, voluptate ullam exercitationem consectetur vitae iusto suscipit est. Quisquam, alias praesentium dignissimos et laudantium similique! Libero." },
+            { title: "Materi 2", text: "Ini adalah materi kedua. Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis, sed commodi ducimus sequi aliquam, nam eveniet totam labore sit magni quasi consectetur distinctio. Id sit pariatur, earum adipisci molestiae architecto? Lorem ipsum dolor sit amet consectetur adipisicing elit. Quibusdam autem enim ex rem sequi, voluptate ullam exercitationem consectetur vitae iusto suscipit est. Quisquam, alias praesentium dignissimos et laudantium similique! Libero. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quibusdam autem enim ex rem sequi, voluptate ullam exercitationem consectetur vitae iusto suscipit est. Quisquam, alias praesentium dignissimos et laudantium similique! Libero. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quibusdam autem enim ex rem sequi, voluptate ullam exercitationem consectetur vitae iusto suscipit est. Quisquam, alias praesentium dignissimos et laudantium similique! Libero." },
+            { title: "Materi 3", text: "Ini adalah materi ketiga.Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis, sed commodi ducimus sequi aliquam, nam eveniet totam labore sit magni quasi consectetur distinctio. Id sit pariatur, earum adipisci molestiae architecto? Lorem ipsum dolor sit amet consectetur adipisicing elit. Quibusdam autem enim ex rem sequi, voluptate ullam exercitationem consectetur vitae iusto suscipit est. Quisquam, alias praesentium dignissimos et laudantium similique! Libero. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quibusdam autem enim ex rem sequi, voluptate ullam exercitationem consectetur vitae iusto suscipit est. Quisquam, alias praesentium dignissimos et laudantium similique! Libero. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quibusdam autem enim ex rem sequi, voluptate ullam exercitationem consectetur vitae iusto suscipit est. Quisquam, alias praesentium dignissimos et laudantium similique! Libero." },
+            { title: "Materi 4", text: "Ini adalah materi keempat.Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis, sed commodi ducimus sequi aliquam, nam eveniet totam labore sit magni quasi consectetur distinctio. Id sit pariatur, earum adipisci molestiae architecto? Lorem ipsum dolor sit amet consectetur adipisicing elit. Quibusdam autem enim ex rem sequi, voluptate ullam exercitationem consectetur vitae iusto suscipit est. Quisquam, alias praesentium dignissimos et laudantium similique! Libero. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quibusdam autem enim ex rem sequi, voluptate ullam exercitationem consectetur vitae iusto suscipit est. Quisquam, alias praesentium dignissimos et laudantium similique! Libero. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quibusdam autem enim ex rem sequi, voluptate ullam exercitationem consectetur vitae iusto suscipit est. Quisquam, alias praesentium dignissimos et laudantium similique! Libero." }
+        ];
+        let currentPage = 0;
+
+        document.getElementById("cube").addEventListener("click", function() {
+            this.classList.add("open");
+            setTimeout(() => {
+                document.getElementById("content").classList.add("active");
+                document.getElementById("resetButton").style.display = "block";
+                updateContent();
+            }, 1000);
+        });
+
+        document.getElementById("resetButton").addEventListener("click", function() {
+            document.getElementById("cube").classList.remove("open");
+            document.getElementById("content").classList.remove("active");
+            document.getElementById("resetButton").style.display = "none";
+        });
+
+        document.getElementById("prevButton").addEventListener("click", function() {
+            if (currentPage > 0) {
+                currentPage--;
+                updateContent();
+            }
+        });
+
+        document.getElementById("nextButton").addEventListener("click", function() {
+            if (currentPage < pages.length - 1) {
+                currentPage++;
+                updateContent();
+            }
+        });
+
+        function updateContent() {
+            document.getElementById("content-title").innerText = pages[currentPage].title;
+            document.getElementById("content-text").innerText = pages[currentPage].text;
+        }
+    </script>
+</body>
+</html>
